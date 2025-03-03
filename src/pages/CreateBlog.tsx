@@ -1,86 +1,77 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom'; // For navigation
-import axios from 'axios'; // For making API requests
+import { useState, ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 const CreateBlog: React.FC = () => {
-  const [title, setTitle] = useState<string>('');
-  const [content, setContent] = useState<string>('');
-  const [error, setError] = useState<string>('');
-  const navigate = useNavigate(); // Using useNavigate
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
 
-  // Handle title input change
   const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
 
-  // Handle content input change
   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
 
-  // Handle category input change
-  
-  // Handle form submission
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!title || !content) {
-      setError('All fields are required.');
+      setError("All fields are required.");
       return;
     }
 
-    const accessToken = localStorage.getItem('access_token');
-     console.log('Access Token:', accessToken); // 🔍 Debugging log
-    const blogData = {
-      title,
-      content,
-    
-    };
+    const blogData = { title, content };
 
     try {
-      // Post data to the backend API (make sure your Django API is set up to handle POST requests for blogs)
-      const response = await axios.post('http://127.0.0.1:8000/api/blogs/blog/', blogData, {
-        headers: {
-          
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`, 
-        },
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/blogs/blog/",
+        blogData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
 
       if (response.status === 201) {
-        navigate('/editor'); // Redirect to Editor page after success
+        navigate("/editor");
       }
     } catch (err) {
-      setError('There was an error creating the blog. Please try again.');
+      setError("There was an error creating the blog. Please try again.");
     }
   };
 
   return (
-    <div className="create-blog-container">
-      <h2>Create a New Blog</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title:</label>
+    <div className="blog-container">
+      <div className="editor">
+        <h2 className="editor-title">Create a New Blog</h2>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="blog-form">
           <input
             type="text"
-            id="title"
             value={title}
             onChange={handleTitleChange}
-            placeholder="Enter the title"
+            placeholder="Title"
+            className="blog-title"
           />
-        </div>
-        <div>
-          <label htmlFor="content">Content:</label>
+
           <textarea
-            id="content"
             value={content}
             onChange={handleContentChange}
-            placeholder="Enter the content"
-          />
-        </div>
-        
-        <button type="submit">Submit</button>
-      </form>
+            placeholder="Tell your story..."
+            className="blog-content"
+          ></textarea>
+
+          <button className="publish-button">Publish</button>
+        </form>
+      </div>
     </div>
   );
 };
