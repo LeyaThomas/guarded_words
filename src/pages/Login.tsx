@@ -13,17 +13,31 @@ const Login = () => {
             const response = await login(email, password);
             if (response.data && response.data.token) {
                 const { access, refresh } = response.data.token;
+                const role = response.data.role;
+    
                 localStorage.setItem("access_token", access);
                 localStorage.setItem("refresh_token", refresh);
+                localStorage.setItem("role", role);
+    
                 alert("Login successful!");
-                navigate("/LandingPage");
+    
+                if (role === "author") {
+                    navigate("/editor");
+                } else if (role === "reader") {
+                    navigate("/reader");
+                } else {
+                    navigate("/login");
+                }
             } else {
                 alert("Token not received");
             }
-        } catch (error) {
+        } catch (error: any) { // ✅ Ensure `error` is properly typed
+            console.error("Login error:", error);
             alert("Invalid credentials");
         }
     };
+    
+    
 
     return (
         <div className="login-container">
