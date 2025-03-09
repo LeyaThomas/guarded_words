@@ -8,7 +8,6 @@ import Editor from "./pages/Editor/Editor";
 import CreateBlog from "./pages/CreateBlog";
 import BlogDetails from "./pages/BlogDetails/BlogDetails";
 import EditBlog from "./pages/Editor/EditBlog";
-// import Dashboard from "./pages/Dashboard";  // Import Dashboard
 
 function App() {
   

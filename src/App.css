@@ -172,6 +172,9 @@
 .signup-button:hover {
   background-color: #0056b3;
 }
+.signup-text{
+  padding-top: 5px;
+}
 
 /* ReaderHeader.css */
 
