@@ -1,7 +1,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flame, BookOpen, Search, MoreVertical, Edit, Trash2 } from "lucide-react";
-import axios from "axios";
+import { privateGateway } from "../../api/auth"; 
+import toast from "react-hot-toast"; 
 import "./Editor.css";
 
 interface Blog {
@@ -19,21 +20,26 @@ const Editor: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [menuVisible, setMenuVisible] = useState<{ [key: number]: boolean }>({});
+  const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
+
+  const loggedInUser = localStorage.getItem("user");
+
+  const normalizeUsername = (username: string | null): string => {
+    if (!username) return "";
+    return username.replace(/-author$/, "").toLowerCase().trim();
+  };
 
   useEffect(() => {
     const fetchStreak = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/blogs/streak/", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-        });
-
+        const response = await privateGateway.get("/blogs/streak/");
         if (response.status === 200) {
           setStreak(response.data.streak_count);
         }
       } catch (error) {
         console.error("Error fetching streak data:", error);
-        setError("Failed to load streak data.");
+        toast.error("Failed to load streak data.");
       }
     };
 
@@ -42,18 +48,15 @@ const Editor: React.FC = () => {
 
   useEffect(() => {
     const fetchBlogs = async () => {
+      setIsLoading(true);
       try {
-        const token = localStorage.getItem("access_token");
-        if (!token) throw new Error("No access token found. Please log in.");
-
-        const response = await axios.get("http://127.0.0.1:8000/api/blogs/blog/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const response = await privateGateway.get("/blogs/blog/");
         setBlogs(response.data);
       } catch (error) {
         console.error("Error fetching blogs:", error);
-        setError("Failed to load blogs. Please log in again.");
+        toast.error("Failed to load blogs. Please log in again.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -73,7 +76,6 @@ const Editor: React.FC = () => {
   };
 
   const handleEdit = (blogId: number) => {
-    console.log("Editing blog:", blogId);
     navigate(`/edit-blog/${blogId}`);
   };
 
@@ -81,19 +83,24 @@ const Editor: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/blogs/blog/${blogId}/`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-      });
-
+      await privateGateway.delete(`/blogs/blog/${blogId}/`);
       setBlogs(blogs.filter((blog) => blog.id !== blogId));
+      toast.success("Blog deleted successfully.");
     } catch (error) {
       console.error("Error deleting blog:", error);
-      setError("Failed to delete the blog.");
+      toast.error("Failed to delete the blog.");
     }
   };
 
-  const filteredBlogs = blogs.filter((blog) =>
-    blog.author.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleBlogClick = (blogId: number) => {
+    navigate(`/blog/${blogId}`);
+  };
+
+  const filteredBlogs = blogs.filter(
+    (blog) =>
+      blog.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blog.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -129,7 +136,7 @@ const Editor: React.FC = () => {
                 {error ? (
                   <span className="error-text">{error}</span>
                 ) : streak !== null ? (
-                  <span className="streak-text">{streak} Days Streak</span>
+                  <span className="streak-text">{streak} days</span>
                 ) : (
                   <span className="streak-text">Loading...</span>
                 )}
@@ -147,40 +154,47 @@ const Editor: React.FC = () => {
       <main className="container main-content">
         <h2 className="main-title">All Blogs</h2>
         <div className="blog-grid">
-          {filteredBlogs.length > 0 ? (
-            filteredBlogs.map((blog) => (
-              <div key={blog.id} className="blog-card">
-                {/* Menu Button at Top-Right */}
-                <div className="menu-container">
-                  <MoreVertical
-                    size={20}
-                    onClick={() => handleMenuToggle(blog.id)}
-                    className="menu-icon"
-                  />
-                  {menuVisible[blog.id] && (
-                    <div className="menu-options">
-                      <button className="edit-button" onClick={() => handleEdit(blog.id)}>
-                        <Edit size={16} /> Edit
-                      </button>
-                      <button className="delete-button" onClick={() => handleDelete(blog.id)}>
-                        <Trash2 size={16} /> Delete
-                      </button>
+          {isLoading ? (
+            <p>Loading blogs...</p>
+          ) : filteredBlogs.length > 0 ? (
+            filteredBlogs.map((blog) => {
+              const normalizedLoggedInUser = normalizeUsername(loggedInUser);
+              const normalizedBlogAuthor = normalizeUsername(blog.author);
+
+              return (
+                <div className="blog-card" key={blog.id} onClick={() => handleBlogClick(blog.id)}>
+                  {normalizedLoggedInUser === normalizedBlogAuthor && (
+                    <div className="menu-container">
+                      <MoreVertical
+                        size={20}
+                        onClick={() => handleMenuToggle(blog.id)}
+                        className="menu-icon"
+                      />
+                      {menuVisible[blog.id] && (
+                        <div className="menu-options">
+                          <button className="edit-button" onClick={() => handleEdit(blog.id)}>
+                            <Edit size={16} /> Edit
+                          </button>
+                          <button className="delete-button" onClick={() => handleDelete(blog.id)}>
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
 
-                {/* Blog Content */}
-                <div className="blog-content">
-                  <h3 className="blog-title">{blog.title}</h3>
-                  <p className="blog-author">by {blog.author}</p>
-                  <p className="blog-date">📅 {formatDate(blog.created_at)}</p>
-                  <p className="blog-excerpt">
-                    {blog.content.length > 100 ? blog.content.substring(0, 100) + "..." : blog.content}
-                  </p>
-                  <p className="blog-views">👀 {blog.views} views</p>
+                  <div className="blog-content">
+                    <h3 className="blog-title">{blog.title}</h3>
+                    <p className="blog-author">by {blog.author}</p>
+                    <p className="blog-date">📅 {formatDate(blog.created_at)}</p>
+                    <p className="blog-excerpt">
+                      {blog.content.length > 100 ? blog.content.substring(0, 100) + "..." : blog.content}
+                    </p>
+                    <p className="blog-views">👀 {blog.views} views</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="error-text">No blogs available.</p>
           )}
