@@ -2,12 +2,11 @@ import { useState } from "react";
 import { signup } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 
-
 const Signup = () => {
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("reader"); // Default role is 'reader'
+    const [role, setRole] = useState("reader"); 
     const navigate = useNavigate();
 
     const handleSignup = async (e: React.FormEvent) => {

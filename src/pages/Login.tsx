@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -14,10 +15,12 @@ const Login = () => {
             if (response.data && response.data.token) {
                 const { access, refresh } = response.data.token;
                 const role = response.data.role;
+                const user = response.data.username
     
                 localStorage.setItem("access_token", access);
                 localStorage.setItem("refresh_token", refresh);
                 localStorage.setItem("role", role);
+                localStorage.setItem("user", user);
     
                 alert("Login successful!");
     
@@ -31,7 +34,7 @@ const Login = () => {
             } else {
                 alert("Token not received");
             }
-        } catch (error: any) { // ✅ Ensure `error` is properly typed
+        } catch (error: any) { 
             console.error("Login error:", error);
             alert("Invalid credentials");
         }
@@ -64,6 +67,9 @@ const Login = () => {
                         Login
                     </button>
                 </form>
+                <p className="signup-text">
+                    Don't have an account? <Link to="/signup" className="signup-link">Sign up</Link>
+                </p>
             </div>
         </div>
     );
