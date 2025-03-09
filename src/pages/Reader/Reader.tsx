@@ -1,6 +1,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { Flame, BookOpen, Search, MoreVertical, Check } from "lucide-react";
-import axios from "axios";
+import { privateGateway } from "../../api/auth"; 
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast"; 
 import "./Reader.css";
 
 interface Blog {
@@ -13,49 +15,50 @@ interface Blog {
 }
 
 const Reader: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [streak, setStreak] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false); 
   const [myReads, setMyReads] = useState<number[]>(() => {
     return JSON.parse(localStorage.getItem("myReads") || "[]");
   });
   const [showMyReads, setShowMyReads] = useState<boolean>(false);
 
+  const handleBlogClick = (blogId: number) => {
+    navigate(`/blog/${blogId}`); // Navigate to BlogDetails page
+  };
+
   useEffect(() => {
     const fetchStreak = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/blogs/streak/", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-        });
-
+        const response = await privateGateway.get("/blogs/streak/");
         if (response.status === 200) {
           setStreak(response.data.streak_count);
         }
       } catch (error) {
         console.error("Error fetching streak data:", error);
-        setError("Failed to load streak data.");
+        toast.error("Failed to load streak data.");
       }
     };
 
     fetchStreak();
   }, []);
 
+
   useEffect(() => {
     const fetchBlogs = async () => {
+      setIsLoading(true);
       try {
-        const token = localStorage.getItem("access_token");
-        if (!token) throw new Error("No access token found. Please log in.");
-
-        const response = await axios.get("http://127.0.0.1:8000/api/blogs/blog/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const response = await privateGateway.get("/blogs/blog/");
         setBlogs(response.data);
       } catch (error) {
         console.error("Error fetching blogs:", error);
-        setError("Failed to load blogs. Please log in again.");
+        toast.error("Failed to load blogs. Please log in again.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -132,7 +135,7 @@ const Reader: React.FC = () => {
         <div className="blog-grid">
           {(showMyReads ? myReadBlogs : filteredBlogs).length > 0 ? (
             (showMyReads ? myReadBlogs : filteredBlogs).map((blog) => (
-              <div className="blog-card" key={blog.id}>
+              <div className="blog-card" key={blog.id} onClick={() => handleBlogClick(blog.id)}>
                 <div className="blog-content">
                   <h3 className="blog-title">{blog.title}</h3>
                   <p className="blog-author">by {blog.author}</p>
