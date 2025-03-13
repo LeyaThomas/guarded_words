@@ -28,7 +28,7 @@ const Reader: React.FC = () => {
   const [showMyReads, setShowMyReads] = useState<boolean>(false);
 
   const handleBlogClick = (blogId: number) => {
-    navigate(`/blog/${blogId}`); 
+    navigate(`/blog/${blogId}`);
   };
 
   useEffect(() => {
@@ -41,11 +41,13 @@ const Reader: React.FC = () => {
       } catch (error) {
         console.error("Error fetching streak data:", error);
         toast.error("Failed to load streak data.");
+        setError("Failed to fetch streak data."); // Now `setError` is used
       }
     };
 
     fetchStreak();
   }, []);
+
 
 
   useEffect(() => {
@@ -136,7 +138,9 @@ const Reader: React.FC = () => {
       <main className="container main-content">
         <h2 className="main-title">{showMyReads ? "My Reads" : "All Blogs"}</h2>
         <div className="blog-grid">
-          {(showMyReads ? myReadBlogs : filteredBlogs).length > 0 ? (
+          {isLoading ? (
+            <p className="loading-text">Loading blogs...</p>
+          ) : (showMyReads ? myReadBlogs : filteredBlogs).length > 0 ? (
             (showMyReads ? myReadBlogs : filteredBlogs).map((blog) => (
               <div className="blog-card" key={blog.id} onClick={() => handleBlogClick(blog.id)}>
                 <div className="blog-content">
@@ -153,7 +157,7 @@ const Reader: React.FC = () => {
                     size={20}
                     className="menu-icon"
                     onClick={(e) => {
-                      e.stopPropagation(); 
+                      e.stopPropagation();
                       handleMenuToggle(blog.id);
                     }}
                   />
@@ -175,6 +179,7 @@ const Reader: React.FC = () => {
           )}
         </div>
       </main>
+
     </div>
   );
 };

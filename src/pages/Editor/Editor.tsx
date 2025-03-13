@@ -40,11 +40,13 @@ const Editor: React.FC = () => {
       } catch (error) {
         console.error("Error fetching streak data:", error);
         toast.error("Failed to load streak data.");
+        setError("Failed to fetch streak data."); // Now `setError` is used
       }
     };
-
+  
     fetchStreak();
   }, []);
+  
 
   useEffect(() => {
     const fetchBlogs = async () => {
