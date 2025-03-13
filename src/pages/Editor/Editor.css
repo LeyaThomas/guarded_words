@@ -6,7 +6,6 @@ body {
     background-color: #f7fafc;
   }
   
-  /* Header Styles */
   .header {
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -230,3 +229,73 @@ body {
   
   .edit-button:hover { background-color: #e0f7e9; }
   .delete-button:hover { background-color: #fdecea; }
+
+  /* Media Queries for Mobile Responsiveness */
+  @media screen and (max-width: 768px) {
+    body {
+      font-size: 14px;
+    }
+    
+    .header-title {
+      font-size: 1.2rem;
+    }
+    
+    .main-title {
+      font-size: 1.2rem;
+    }
+    
+    .blog-title {
+      font-size: 1rem;
+    }
+    
+    .blog-author, 
+    .blog-date, 
+    .blog-excerpt, 
+    .blog-views {
+      font-size: 0.75rem;
+    }
+    
+    .search-input {
+      font-size: 0.75rem;
+      padding: 0.4rem 1rem 0.4rem 2.5rem;
+    }
+    
+    .my-reads-button {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.8rem;
+    }
+    
+    .streak-text {
+      font-size: 0.75rem;
+    }
+    
+    .edit-button, 
+    .delete-button {
+      font-size: 12px;
+      padding: 5px 10px;
+    }
+  }
+  
+  /* Even smaller text for very small screens */
+  @media screen and (max-width: 480px) {
+    body {
+      font-size: 13px;
+    }
+    
+    .header-title {
+      padding-left: -1rem;
+      font-size: 0.9rem;
+    }
+    
+    .main-title {
+      font-size: 1.1rem;
+    }
+    
+    .blog-content {
+      padding: 1rem;
+    }
+    
+    .blog-card {
+      padding: 12px;
+    }
+  }

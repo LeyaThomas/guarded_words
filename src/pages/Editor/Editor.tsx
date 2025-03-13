@@ -1,8 +1,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flame, BookOpen, Search, MoreVertical, Edit, Trash2 } from "lucide-react";
-import { privateGateway } from "../../api/auth"; 
-import toast from "react-hot-toast"; 
+import { privateGateway } from "../../api/auth";
+import toast from "react-hot-toast";
 import "./Editor.css";
 
 interface Blog {
@@ -20,7 +20,7 @@ const Editor: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [menuVisible, setMenuVisible] = useState<{ [key: number]: boolean }>({});
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const loggedInUser = localStorage.getItem("user");
@@ -167,15 +167,31 @@ const Editor: React.FC = () => {
                     <div className="menu-container">
                       <MoreVertical
                         size={20}
-                        onClick={() => handleMenuToggle(blog.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMenuToggle(blog.id);
+                        }}
                         className="menu-icon"
                       />
+
                       {menuVisible[blog.id] && (
                         <div className="menu-options">
-                          <button className="edit-button" onClick={() => handleEdit(blog.id)}>
+                          <button
+                            className="edit-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(blog.id);
+                            }}
+                          >
                             <Edit size={16} /> Edit
                           </button>
-                          <button className="delete-button" onClick={() => handleDelete(blog.id)}>
+                          <button
+                            className="delete-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(blog.id);
+                            }}
+                          >
                             <Trash2 size={16} /> Delete
                           </button>
                         </div>

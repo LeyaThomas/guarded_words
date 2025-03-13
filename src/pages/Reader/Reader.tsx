@@ -1,8 +1,8 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { Flame, BookOpen, Search, MoreVertical, Check } from "lucide-react";
-import { privateGateway } from "../../api/auth"; 
+import { privateGateway } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast"; 
+import toast from "react-hot-toast";
 import "./Reader.css";
 
 interface Blog {
@@ -21,14 +21,14 @@ const Reader: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const [myReads, setMyReads] = useState<number[]>(() => {
     return JSON.parse(localStorage.getItem("myReads") || "[]");
   });
   const [showMyReads, setShowMyReads] = useState<boolean>(false);
 
   const handleBlogClick = (blogId: number) => {
-    navigate(`/blog/${blogId}`); // Navigate to BlogDetails page
+    navigate(`/blog/${blogId}`); 
   };
 
   useEffect(() => {
@@ -122,7 +122,10 @@ const Reader: React.FC = () => {
                   <span className="streak-text">Loading...</span>
                 )}
               </div>
-              <button className="my-reads-button" onClick={() => setShowMyReads(!showMyReads)}>
+              <button className="my-reads-button" onClick={(e) => {
+                e.stopPropagation();
+                setShowMyReads(!showMyReads)
+              }}>
                 <BookOpen size={20} />
                 <span>My Reads</span>
               </button>
@@ -146,10 +149,20 @@ const Reader: React.FC = () => {
                   <p className="blog-views">👀 {blog.views} views</p>
                 </div>
                 <div className="menu-container">
-                  <MoreVertical size={20} className="menu-icon" onClick={() => handleMenuToggle(blog.id)} />
+                  <MoreVertical
+                    size={20}
+                    className="menu-icon"
+                    onClick={(e) => {
+                      e.stopPropagation(); 
+                      handleMenuToggle(blog.id);
+                    }}
+                  />
                   {menuOpen === blog.id && (
                     <div className="menu-dropdown">
-                      <button onClick={() => handleMarkAsRead(blog.id)}>
+                      <button onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsRead(blog.id);
+                      }}>
                         <Check size={16} /> Mark as Read
                       </button>
                     </div>
